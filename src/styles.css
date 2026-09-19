@@ -1,0 +1,53 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: #223327;
+  background: #f5f8f5;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button,
+input {
+  font: inherit;
+}
+button,
+a,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  cursor: pointer;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 3px solid #386943;
+  outline-offset: 4px;
+}
+button {
+  color: inherit;
+}
+button:disabled {
+  cursor: default;
+}
+::selection {
+  background: #ffe800;
+}
+button {
+  transition:
+    background 0.18s,
+    transform 0.18s;
+}
+button:hover {
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

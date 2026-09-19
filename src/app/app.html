@@ -1,0 +1,267 @@
+<header>
+  <div class="header-inner">
+    <a class="brand" href="./" aria-label="TimeCraft home"
+      ><span class="logo">◷</span>TimeCraft<span class="brand-dot">.</span></a
+    >
+    <nav aria-label="Calculator navigation">
+      <button [class.current]="mode === 'date'" (click)="switchMode('date')">Date Calculator</button
+      ><button [class.current]="mode === 'time'" (click)="switchMode('time')">
+        Time Calculator
+      </button>
+    </nav>
+    <span class="local-badge"><span></span> All local. All yours.</span>
+  </div>
+</header>
+<main>
+  <section class="intro">
+    <span class="eyebrow"><span>✦</span> A LITTLE CLARITY FOR YOUR EVERYDAY</span>
+    <h1>
+      Make every
+      <span
+        >moment count.<svg viewBox="0 0 420 14" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M3 9 Q200 -3 417 8" /></svg
+      ></span>
+    </h1>
+    <p>Calculate the difference between dates and times instantly.</p>
+    <div class="hero-spark" aria-hidden="true">✳</div>
+  </section>
+  <div class="tabs" aria-label="Choose a calculator">
+    <button
+      [class.active]="mode === 'date'"
+      [attr.aria-pressed]="mode === 'date'"
+      (click)="switchMode('date')"
+    >
+      <span aria-hidden="true">▦</span> Date Calculator</button
+    ><button
+      [class.active]="mode === 'time'"
+      [attr.aria-pressed]="mode === 'time'"
+      (click)="switchMode('time')"
+    >
+      <span aria-hidden="true">◷</span> Time Calculator
+    </button>
+  </div>
+  <section class="workspace">
+    <div class="calculator">
+      <div class="card-heading">
+        <span class="tool-icon" aria-hidden="true">{{ mode === 'date' ? '▦' : '◷' }}</span>
+        <div>
+          <h2>{{ mode === 'date' ? 'Date Calculator' : 'Time Calculator' }}</h2>
+          <p>
+            {{
+              mode === 'date'
+                ? 'Find the exact difference between two dates.'
+                : 'Find the duration between two times.'
+            }}
+          </p>
+        </div>
+      </div>
+      <form (ngSubmit)="calculate()" novalidate>
+        <div class="inputs">
+          @if (mode === 'date') {
+            <label for="start-date"
+              >Start date<input
+                id="start-date"
+                type="date"
+                name="startDate"
+                [(ngModel)]="startDate"
+                (ngModelChange)="clearResult()"
+                aria-describedby="calculation-note error"
+                required
+            /></label>
+            <div>
+              <label for="end-date"
+              >End date<input
+                id="end-date"
+                type="date"
+                name="endDate"
+                [(ngModel)]="endDate"
+                (ngModelChange)="clearResult()"
+                aria-describedby="calculation-note error"
+                required
+              /></label>
+              <div class="quick">
+                <button type="button" (click)="setEndDateToday()" aria-label="Set end date to today">
+                  Today
+                </button>
+              </div>
+            </div>
+          } @else {
+            @for (field of timeFields; track field.key) {
+              <div class="time-field">
+                <label [for]="field.key"
+                  >{{ field.label }}
+                  <input
+                    [id]="field.key"
+                    type="time"
+                    step="1"
+                    [name]="field.key"
+                    [(ngModel)]="this[field.key]"
+                    (ngModelChange)="clearResult()"
+                    aria-describedby="calculation-note error"
+                    required
+                  />
+                </label>
+                <div class="quick" role="group" [attr.aria-label]="field.label + ' quick fill'">
+                  <button type="button" (click)="quickFill(field.key, 0)">Now</button>
+                  <button type="button" (click)="quickFill(field.key, 30)">+30 min</button>
+                  <button type="button" (click)="quickFill(field.key, 60)">+1 hour</button>
+                  <button type="button" (click)="quickFill(field.key, 480)">+8 hours</button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+        @if (mode === 'date') {
+          <label class="include-end">
+            <input
+              type="checkbox"
+              name="includeEndDay"
+              [(ngModel)]="includeEndDay"
+              (ngModelChange)="updateInclusion()"
+            />
+            Include end day <span>(add 1 day)</span>
+          </label>
+        }
+        <div id="error" role="alert">
+          @if (error) {
+            <p class="error">{{ error }}</p>
+          }
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">
+            {{ mode === 'date' ? 'Calculate difference' : 'Calculate duration' }}
+            <span aria-hidden="true">↗</span></button
+          ><button class="reset" type="button" (click)="reset()">
+            <span aria-hidden="true">↺</span> Reset
+          </button>
+        </div>
+        <p class="note" id="calculation-note">
+          <span aria-hidden="true">ⓘ</span>
+          {{
+            mode === 'date'
+              ? includeEndDay
+                ? 'Both start and end days are included in all totals.'
+                : 'Elapsed days between dates. The end date is excluded.'
+              : 'End time earlier than start? We count it as the next day.'
+          }}
+        </p>
+      </form>
+      <div class="card-bottom">
+        <span><span class="tiny-dot"></span> Precise by the second. Simple by design.</span
+        ><span aria-hidden="true">✦</span>
+      </div>
+    </div>
+    <aside class="result" aria-live="polite" aria-atomic="true">
+      <div class="result-top">
+        <span>YOUR RESULT</span
+        ><span class="result-status">{{
+          (mode === 'date' ? dateResult : timeResult) ? '✓ Calculated' : 'Ready when you are'
+        }}</span>
+      </div>
+      @if (mode === 'date' && dateResult; as result) {
+        <div class="result-content">
+          <p class="date-range">{{ result.start }} → {{ result.end }}</p>
+          <div class="date-duration">
+            <span>{{ result.years }} {{ result.years === 1 ? 'year' : 'years' }},</span>
+            <span>{{ result.calendarMonths }} {{ result.calendarMonths === 1 ? 'month' : 'months' }},</span>
+            <span>{{ result.remainder }} {{ result.remainder === 1 ? 'day' : 'days' }}</span>
+          </div>
+          <p class="result-label">Calendar difference</p>
+          <div class="breakdown">Total days: {{ result.days | number }}</div>
+          <div class="stats">
+            <div>
+              <strong>{{ result.weeks }}w {{ result.weekDays }}d</strong><span>Weeks & days</span>
+            </div>
+            <div>
+              <strong>{{ result.hours | number }}</strong
+              ><span>Total hours</span>
+            </div>
+            <div>
+              <strong>{{ result.working | number }}</strong
+              ><span>Working days</span>
+            </div>
+            <div>
+              <strong>{{ result.weekends | number }}</strong
+              ><span>Weekend days</span>
+            </div>
+          </div>
+          <p class="result-footnote">Mon–Fri working days; holidays not excluded.</p>
+        </div>
+      } @else if (mode === 'time' && timeResult; as result) {
+        <div class="result-content">
+          <p class="date-range">
+            {{ startTime }} → {{ endTime }}{{ result.overnight ? ' (next day)' : '' }}
+          </p>
+          <div class="time-number">
+            {{ result.hours }}<small>h</small> {{ result.minutes }}<small>m</small>
+            {{ result.seconds }}<small>s</small>
+          </div>
+          <p class="result-label">time, beautifully measured</p>
+          <div class="breakdown">{{ result.totalSeconds | number }} total seconds</div>
+          <div class="stats">
+            <div>
+              <strong>{{ result.total | number: '1.0-4' }}</strong
+              ><span>Total minutes</span>
+            </div>
+            <div>
+              <strong>{{ result.decimal | number: '1.0-6' }}</strong
+              ><span>Total hours</span>
+            </div>
+          </div>
+          <p class="result-footnote">
+            {{
+              result.overnight
+                ? 'Your duration crosses midnight.'
+                : 'Equal times count as zero duration.'
+            }}
+          </p>
+        </div>
+      } @else {
+        <div class="empty-result">
+          <div class="clock-art" aria-hidden="true">
+            <span class="clock-hand"></span><span class="clock-center"></span
+            ><span class="clock-tick top"></span><span class="clock-tick bottom"></span
+            ><span class="clock-tick left"></span><span class="clock-tick right"></span><i>✦</i>
+          </div>
+          <h3>A moment of discovery.</h3>
+          <p>
+            Pick your {{ mode === 'date' ? 'dates' : 'times' }}, hit calculate, and<br />leave the
+            counting to us.
+          </p>
+          <span class="empty-line"></span>
+        </div>
+      }
+    </aside>
+  </section>
+  <section class="features" aria-label="Why TimeCraft">
+    <div>
+      <span class="feature-icon yellow">ϟ</span>
+      <div>
+        <h3>Instant answers</h3>
+        <p>Skip the math. Get to the result.</p>
+      </div>
+    </div>
+    <div>
+      <span class="feature-icon blue">◇</span>
+      <div>
+        <h3>Private by default</h3>
+        <p>Your calculations stay in your browser.</p>
+      </div>
+    </div>
+    <div>
+      <span class="feature-icon peach">◎</span>
+      <div>
+        <h3>Made for everyday</h3>
+        <p>From project plans to weekend plans.</p>
+      </div>
+    </div>
+  </section>
+  <div class="small-print">
+    <span aria-hidden="true">✧</span> Big plans or little moments. It all adds up.
+  </div>
+</main>
+<footer>
+  <span class="footer-brand">◷ TimeCraft.</span
+  ><span>Built with Angular <span class="footer-dot">•</span> Date & Time Calculator</span
+  ><span>Make time for what matters. <span class="heart">♡</span></span>
+</footer>
